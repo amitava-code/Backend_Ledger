@@ -40,6 +40,16 @@ console.log("Auth Header:", req.headers.authorization);
     }
 }
 
+/**
+ Token extracted
+JWT verified → decoded
+decoded.userId used
+User fetched from DB
+Role checked (systemUser)
+User attached to request
+next() → controller runs
+ */
+
 async function authSystemUserMiddleware(req,res,next){
 
     console.log("cookies:", req.cookies)

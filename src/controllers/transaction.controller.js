@@ -20,11 +20,89 @@ const { default: mongoose } = require("mongoose");
   * Send EMAIL notifiaction
   */
 
+ //1 Validate Request 
+
 async function createTransaction(req,res){
 
     const{fromAccount,toAccount,amount,idempotencyKey}=req.body
 
+    if(!fromAccount || !toAccount || !amount || !idempotencyKey){
+        return res.status(400).json({
+            message:"THIS field is REQUIRED "
+        })
+    }
+
+    const fromUserAccount= await accountModel.findOne({
+        _id:fromAccount,
+    })
+
+    const toUserAccount= await accountModel.findOne({
+        _id:toAccount,
+    })
+
+    if(!fromUserAccount || !toUserAccount){
+        return res.status(404).json({
+            message:"Invalid from or to account"
+        })
+    }
+
 }
+
+
+//2 Validate IdempotencyKey
+
+
+const isTransactionAlreadyExists= await transactionModel.findone({
+    idempotencyKey:idempotencyKey
+})
+
+if(isTransactionAlreadyExists){
+    if(isTransactionAlreadyExists.status==="COMPLETED"){
+        return res.status(200).json({
+            message:"Transaction already processed",
+            transaction:isTransactionAlreadyExists
+        })
+    }
+    if(isTransactionAlreadyExists.status==="PENDING"){
+        return res.status(200).json({
+            message:"Transaction in process"
+        })
+    }
+    if(isTransactionAlreadyExists.sttaus==="FAILED"){
+        return res.status(500).json({
+            message:"Transaction processing Failed , pls RETRY"
+        })
+    }
+    if(isTransactionAlreadyExists.status==="REVERSED"){
+        return res.status(500).json({
+            message:"Transaction was reversed, pls try again"
+        })
+    }
+}
+
+
+//3 Checking account status
+
+if(fromUserAccount !== "ACTIVE" || toUserAccount !=="ACTIVE"){
+    return res.status(400).json({
+        message:"BOTH fromAccount and toAcoount must be ACTIVE to process transaction"
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 async function createInitialFundsTransaction(req,res){
@@ -33,7 +111,9 @@ async function createInitialFundsTransaction(req,res){
 
     const{ toAccount,amount,idempotencyKey}= req.body
 
-    if(!toAccount || !amount || !idempotencyKey){
+    if(!toAccount || !amount || !idempotencyKey){    // request validation guard /**
+    //                                                  without this -> invalid transaction    
+    //                                                  DB integrity breaks + null values is DB  */
         return res.status(400).json({
             message:"toAccount, amount and idempotencyKey are required"
         })
@@ -108,6 +188,10 @@ async function createInitialFundsTransaction(req,res){
 
 
 }
+
+
+
+
 
 module.exports={
     createTransaction,createInitialFundsTransaction
