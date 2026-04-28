@@ -1,5 +1,5 @@
 const mongoose=require("mongoose");
-const ledgerModel= require("./ldeger.model");
+const ledgerModel= require("../models/ledger.model");
 
 
 const accountSchema= new mongoose.Schema({
@@ -60,8 +60,8 @@ accountSchema.methods.getBalance= async function(){
         },
         {
             $project: {
-                _id:0,
-                balance: { $subtract: ["$totalCredit","$totalDebit"]}
+                _id:0,                // TODO: Fix transaction type logic (CREDIT/DEBIT reversed in DB)
+                balance: { $subtract: ["$totalDebit","$totalCredit"]}
             }
         }
     ])

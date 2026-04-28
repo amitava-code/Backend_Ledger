@@ -3,7 +3,6 @@ const ledgerModel= require("../models/ledger.model");
 const accountModel=require("../models/account.model");
 const emailService=require("../services/email.service");
 const { default: mongoose } = require("mongoose");
-const mongoose= require("mongoose");
 
 /**
  * - Create a new transaction
