@@ -1,5 +1,10 @@
 const mongoose=require("mongoose");
-const ledgerModel= require("../models/ledger.model");
+const ledgerModel= require("../models/ledger.model"); //Because account does NOT store balance directly
+           //   Account model
+           // stores: user, status, currency
+           // ❌ does NOT store balance
+           //Ledger model
+           //stores: every transaction entry
 
 
 const accountSchema= new mongoose.Schema({
@@ -11,7 +16,7 @@ const accountSchema= new mongoose.Schema({
     },
     status:{
         type: String,
-        enum:{
+        enum:{                                                     //enum restricts a field to a fixed set of allowed values only
             values:[ "ACTIVE","FROZEN","CLOSED"],
             message:" Status can be either ACTIVE, FROZEN or CLOSED",
         },
@@ -27,7 +32,7 @@ const accountSchema= new mongoose.Schema({
 })
 
 
-accountSchema.index({user:1, status:1})
+accountSchema.index({user:1, status:1})  //1 = ascending order (used to define index structure, not filtering logic)
 
 //* AGGREGATION PIPELINE
 
@@ -66,11 +71,11 @@ accountSchema.methods.getBalance= async function(){
         }
     ])
 
-    if(balanceData.length === 0){
+    if(balanceData.length === 0){    // if no transactions exist → balance = 0
         return 0
     }
 
-    return balanceData[0].balance
+    return balanceData[0].balance     //Extract actual value from array
 
 }
 

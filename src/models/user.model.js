@@ -22,11 +22,12 @@ const userSchema= new mongoose.Schema({
         minlength:[6,"password should be conatin more than 6 characters"],
         select:false
     },
-    systemUser:{
-        type:String,
-        default: false,
-        immutable:true,
-        select:false
+    systemUser:{                       //systemUser-> seperate  normal user vs admin(sytem-controlled user)
+                                       
+        type:String,                   
+        default: false,                // all users are normal user NOT a system user by default
+        immutable:true,                //once created , can not be chnaged or update
+        select:false                   //This field is hidden from queries by default won't show in .find()
     }
 },{
     timestamps:true
